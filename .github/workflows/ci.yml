@@ -1,0 +1,434 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  GO_VERSION: '1.24.3'
+  FLUTTER_VERSION: '3.32.1'
+
+jobs:
+  # Lint and format check
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
+
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            frontend/.dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('frontend/pubspec.lock') }}
+
+      - name: Install Go dependencies
+        working-directory: backend
+        run: go mod download
+
+      - name: Install Flutter dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Lint Go code
+        working-directory: backend
+        run: |
+          go vet ./...
+          go fmt ./...
+          # Check if code is formatted
+          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+            echo "Go code is not formatted. Please run 'go fmt ./...'"
+            exit 1
+          fi
+
+      - name: Lint Dart code
+        working-directory: frontend
+        run: |
+          dart analyze
+          dart format --set-exit-if-changed .
+
+  # Backend tests
+  backend-test:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17.5
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
+
+      - name: Install dependencies
+        working-directory: backend
+        run: go mod download
+
+      - name: Run unit tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable
+        run: |
+          go test -v -race -coverprofile=coverage.out ./...
+          go tool cover -func=coverage.out
+
+      - name: Run integration tests
+        working-directory: backend
+        env:
+          DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable
+        run: go test -v -tags=integration ./tests/...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: backend/coverage.out
+          flags: backend
+
+  # Frontend tests
+  frontend-test:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            frontend/.dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('frontend/pubspec.lock') }}
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Run unit tests
+        working-directory: frontend
+        run: flutter test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: frontend/coverage/lcov.info
+          flags: frontend
+
+  # Build applications
+  build:
+    name: Build Applications
+    runs-on: ubuntu-latest
+    needs: [lint, backend-test, frontend-test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('backend/go.sum') }}
+
+      - name: Cache Flutter packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.pub-cache
+            frontend/.dart_tool
+          key: ${{ runner.os }}-flutter-${{ hashFiles('frontend/pubspec.lock') }}
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: go mod download
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/server cmd/server/main.go
+          CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o bin/migrate cmd/migrate/main.go
+
+      - name: Build frontend (web)
+        working-directory: frontend
+        run: flutter build web --release
+
+      - name: Upload backend artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-binaries
+          path: backend/bin/
+
+      - name: Upload frontend artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-web
+          path: frontend/build/web/
+
+  # Docker build and push
+  docker:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        if: github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/course-backend
+            ${{ secrets.DOCKERHUB_USERNAME }}/course-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/course-backend:${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/course-frontend:${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Deploy preview for pull requests
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [docker]
+    if: github.event_name == 'pull_request'
+    environment:
+      name: preview-${{ github.event.number }}
+      url: https://preview-${{ github.event.number }}.course.example.com
+    steps:
+      - name: Deploy to preview environment
+        run: |
+          echo "🚀 Deploying preview for PR #${{ github.event.number }}"
+          echo "Preview URL: https://preview-${{ github.event.number }}.course.example.com"
+          # Add actual deployment logic here (e.g., update Kubernetes, Heroku, etc.)
+
+  # Security scanning
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Lab validation (for student submissions)
+  validate-labs:
+    name: Validate Lab Submissions
+    runs-on: ubuntu-latest
+    if: contains(github.head_ref, 'lab')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable' # Optional: specify channel
+
+      - name: Extract lab number
+        id: lab
+        run: |
+          LAB_NUM=$(echo ${{ github.head_ref }} | grep -o 'lab[0-9]*' | grep -o '[0-9]*')
+          if [ -z "$LAB_NUM" ]; then
+            echo "Could not extract lab number from branch ${{ github.head_ref }}"
+            exit 1
+          fi
+          echo "number=$LAB_NUM" >> $GITHUB_OUTPUT
+          echo "Lab number extracted: $LAB_NUM"
+
+      - name: Validate lab structure and run Go/Flutter specific tasks
+        run: |
+          LAB_DIR="labs/lab${{ steps.lab.outputs.number }}"
+          echo "Validating lab: $LAB_DIR"
+
+          if [ ! -d "$LAB_DIR" ]; then
+            echo "❌ Lab directory $LAB_DIR not found"
+            exit 1
+          fi
+          
+          if [ ! -f "$LAB_DIR/README.md" ]; then
+            echo "❌ README.md not found in $LAB_DIR"
+            exit 1
+          fi
+          echo "✅ Lab structure validation passed for $LAB_DIR/README.md"
+
+          # Backend validation (Go)
+          LAB_BACKEND_DIR="$LAB_DIR/backend"
+          if [ -d "$LAB_BACKEND_DIR" ]; then
+            echo "🧪 Found backend component in $LAB_BACKEND_DIR. Processing..."
+            cd "$LAB_BACKEND_DIR"
+            if [ -f "go.mod" ]; then
+              echo "Installing Go dependencies for lab backend..."
+              go mod download
+              go mod tidy
+            else
+              echo "ℹ️ No go.mod found in $LAB_BACKEND_DIR. Skipping dependency installation."
+            fi
+            echo "Linting Go code for lab backend..."
+            go vet ./...
+            if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+              echo "❌ Go code in $LAB_BACKEND_DIR is not formatted. Please run 'go fmt ./...'"
+              gofmt -s -l .
+              # exit 1 # Consider if this should be a hard fail
+            else
+              echo "✅ Go code formatting check passed for lab backend."
+            fi
+            echo "Running Go unit tests for lab backend..."
+            go test -v ./...
+            cd ../.. # Return to LAB_DIR's parent
+            echo "✅ Backend component processing completed for $LAB_BACKEND_DIR."
+          else
+            echo "ℹ️ No backend component found in $LAB_BACKEND_DIR."
+          fi
+
+          # Frontend validation (Flutter)
+          LAB_FRONTEND_DIR="$LAB_DIR/frontend"
+          if [ -d "$LAB_FRONTEND_DIR" ]; then
+            echo "🧪 Found frontend component in $LAB_FRONTEND_DIR. Processing..."
+            cd "$LAB_FRONTEND_DIR"
+            if [ -f "pubspec.yaml" ]; then
+              echo "Installing Flutter dependencies for lab frontend..."
+              flutter pub get
+            else
+              echo "ℹ️ No pubspec.yaml found in $LAB_FRONTEND_DIR. Skipping dependency installation."
+            fi
+            echo "Linting Dart code for lab frontend..."
+            dart analyze --fatal-infos --fatal-warnings . # Stricter linting
+            echo "Formatting Dart code for lab frontend..."
+            dart format --set-exit-if-changed .
+            echo "Running Flutter unit tests for lab frontend..."
+            flutter test
+            cd ../.. # Return to LAB_DIR's parent
+            echo "✅ Frontend component processing completed for $LAB_FRONTEND_DIR."
+          else
+            echo "ℹ️ No frontend component found in $LAB_FRONTEND_DIR."
+          fi
+          
+          echo "✅ Lab Go/Flutter specific tasks validation passed for $LAB_DIR"
+
+      - name: Run lab-specific general tests (test.sh)
+        run: |
+          LAB_DIR="labs/lab${{ steps.lab.outputs.number }}"
+          if [ -f "$LAB_DIR/test.sh" ]; then
+            echo "🧪 Running lab-specific general tests from $LAB_DIR/test.sh..."
+            chmod +x "$LAB_DIR/test.sh"
+            (cd "$LAB_DIR" && ./test.sh)
+            echo "✅ Lab-specific general tests completed."
+          else
+            echo "ℹ️ No general lab-specific test script (test.sh) found in $LAB_DIR."
+          fi 
