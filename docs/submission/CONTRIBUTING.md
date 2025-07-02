@@ -362,18 +362,6 @@ git add .
 git rebase --continue
 ```
 
-## 🎯 Assessment Criteria
-
-Your lab submissions will be evaluated on:
-
-| Criteria | Weight | Description |
-|----------|--------|-------------|
-| **Functionality** | 40% | Implementation meets requirements, works as expected |
-| **Code Quality** | 25% | Clean, readable, well-structured code |
-| **Testing** | 20% | Comprehensive tests, good coverage |
-| **Documentation** | 10% | Clear README, code comments, API documentation |
-| **Collaboration** | 5% | Participation in code reviews, helping others |
-
 ## 💡 Tips for Success
 
 1. **Start early** - Don't wait until the deadline
@@ -389,12 +377,3 @@ Your lab submissions will be evaluated on:
 - [Flutter Style Guide](https://dart.dev/guides/language/effective-dart/style)
 - [Git Best Practices](https://git-scm.com/doc)
 - [How to Write a Git Commit Message](https://chris.beams.io/posts/git-commit/)
-
-## 📞 Getting Help
-
-- **Slack**: #go-flutter-course
-- **Office Hours**: Tuesdays 2-4 PM, Thursdays 10-12 PM
-- **Email**: instructor@university.edu
-- **Discussion Forum**: GitHub Discussions in this repository
-
-Remember: **Collaboration is encouraged, copying is not**. Learn together, but submit your own work! 
