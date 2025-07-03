@@ -174,7 +174,7 @@ Lecture 03: **Data & APIs**
 - **Flutter HTTP Clients**: Consuming APIs effectively
 - **Integration**: Full-stack communication patterns
 
-## What We'll Learn
+## What we'll learn
 - **Why APIs exist and how they evolved**
 - **REST architectural principles and design**
 - **HTTP protocol deep dive and best practices**  
@@ -187,7 +187,7 @@ Lecture 03: **Data & APIs**
 
 ---
 
-# Learning Path
+# Learning path
 
 <div class="slide-content">
 
@@ -206,10 +206,9 @@ Web Fundamentals
                         Full-Stack Integration
 ```
 
-## Progressive Learning Structure
-- **Foundation First**: HTTP and REST principles
-- **Server Development**: Go HTTP servers and middleware
-- **Client Development**: Flutter HTTP consumption
+- **Foundation first**: HTTP and REST principles
+- **Server development**: Go HTTP servers and middleware
+- **Client development**: Flutter HTTP consumption
 - **Integration**: Real-world communication patterns
 
 </div>
@@ -220,11 +219,9 @@ Web Fundamentals
 
 <div class="slide-content">
 
-## What is an API?
-
 > **API (Application Programming Interface)** is a contract that defines how different software components should interact.
 
-#### Why APIs Exist
+#### Why APIs exist
 - **Separation of concerns**: Frontend and backend can evolve independently
 - **Reusability**: One API serves multiple clients (mobile, web, desktop)
 - **Scalability**: Distribute load across multiple services
@@ -241,21 +238,20 @@ Web Fundamentals
 
 ---
 
-# History of Web APIs
+# History of web APIs
 
 <div class="slide-content">
 
-#### Evolution Timeline
-- **1990s**: Static HTML pages, no dynamic data
-- **Early 2000s**: SOAP (Simple Object Access Protocol) - heavyweight XML
-- **2000s**: REST emerges - lightweight, HTTP-based
-- **2010s**: JSON becomes dominant over XML
-- **2010s+**: GraphQL, gRPC for specialized needs
+- **1990s**: Web 1.0 - Static HTML pages, no dynamic data
+- **Early 2000s**: Web 1.0 - SOAP (Simple Object Access Protocol) 
+- **2000s**: Web 2.0 begins - REST emerges - lightweight, HTTP-based
+- **2010s**: Web 2.0 matures - JSON becomes dominant over XML
+- **2015+**: Web 2.0 evolves - GraphQL, gRPC for specialized needs
+- **2020s**: Web 3.0 emerges - Blockchain APIs, Decentralized protocols
 
 <div class="code-columns">
 <div>
 
-#### SOAP (Legacy)
 ```xml
 <soap:Envelope>
   <soap:Header>
@@ -276,13 +272,11 @@ Web Fundamentals
 
 <div>
 
-#### REST (Modern)
 ```http
 GET /api/users/123 HTTP/1.1
 Host: api.example.com
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 Content-Type: application/json
-
 {
   "id": 123,
   "name": "John Doe",
@@ -298,13 +292,16 @@ Content-Type: application/json
 
 ---
 
-# HTTP Protocol Deep Dive
+# HTTP protocol deep dive
 
 <div class="slide-content">
 
-> **HTTP (Hypertext Transfer Protocol)** is the foundation of data communication on the World Wide Web.
+> **HTTP (Hypertext Transfer Protocol)** is the foundation of data communication on the World Wide Web, because it is the most popular
 
-## HTTP Request Structure
+<div class="code-columns">
+<div>
+
+#### HTTP request structure
 ```http
 METHOD /path/to/resource HTTP/1.1
 Host: api.example.com
@@ -317,7 +314,11 @@ Content-Length: 123
 }
 ```
 
-## HTTP Response Structure
+</div>
+
+<div>
+
+#### HTTP response structure
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -331,6 +332,9 @@ Date: Wed, 02 Jul 2025 10:00:00 GMT
 ```
 
 </div>
+
+</div>
+
 
 ---
 
@@ -405,7 +409,30 @@ Date: Wed, 02 Jul 2025 10:00:00 GMT
 
 ---
 
-# REST Architectural Principles
+# HTTP cat status codes
+
+<div class="slide-content">
+
+> HTTP cat status codes are a fun way to remember - https://http.cat/
+
+<style scoped>
+img {
+  max-height: 450px !important;
+  max-width: 90% !important;
+  object-fit: contain !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+</style>
+
+![HTTP cat status codes](./assets/http-cat-status-codes.png)
+
+
+</div>
+
+---
+
+# REST architectural principles
 
 <div class="slide-content">
 
@@ -413,12 +440,22 @@ Date: Wed, 02 Jul 2025 10:00:00 GMT
 
 ## Core Principles
 
+<div class="code-columns">
+<div>
+
+
+
 #### 1. Client-Server Architecture
 - **Separation of concerns**: UI and data storage are independent
 - **Portability**: Client can run on different platforms
 - **Scalability**: Components can be scaled independently
 
 #### 2. Stateless
+
+</div>
+
+<div>
+
 - **No session state**: Each request contains all necessary information
 - **Scalability**: Server doesn't need to maintain client context
 - **Reliability**: No session data to lose
@@ -429,9 +466,13 @@ Date: Wed, 02 Jul 2025 10:00:00 GMT
 
 </div>
 
+</div>
+
+</div>
+
 ---
 
-# REST Principles Continued
+# REST principles (continued)
 
 <div class="slide-content">
 
@@ -515,7 +556,6 @@ POST   /api/createPost         # Redundant verb
 {
   "id": 123,
   "name": "John Doe",
-  "email": "john@example.com",
   "active": true,
   "roles": ["user", "admin"],
   "profile": {
@@ -525,8 +565,8 @@ POST   /api/createPost         # Redundant verb
   "created_at": "2025-07-02T10:00:00Z"
 }
 ```
+</br>
 
-**Pros:**
 - Human-readable
 - Lightweight
 - Native JavaScript support
@@ -541,7 +581,6 @@ POST   /api/createPost         # Redundant verb
 <user>
   <id>123</id>
   <name>John Doe</name>
-  <email>john@example.com</email>
   <active>true</active>
   <roles>
     <role>user</role>
@@ -555,7 +594,8 @@ POST   /api/createPost         # Redundant verb
 </user>
 ```
 
-**Pros:**
+</br>
+
 - Schema validation
 - Namespace support
 - Mature ecosystem
@@ -572,9 +612,10 @@ POST   /api/createPost         # Redundant verb
 
 <div class="slide-content">
 
-## Go's HTTP Package
-
 > Go's **`net/http`** package provides a powerful, production-ready HTTP server with excellent performance characteristics.
+
+<div class="code-columns">
+<div>
 
 #### Key Features
 - **Built-in HTTP server**: No external dependencies needed
@@ -583,6 +624,11 @@ POST   /api/createPost         # Redundant verb
 - **Context integration**: Request cancellation and timeouts
 - **TLS support**: HTTPS out of the box
 - **High performance**: Handles thousands of concurrent connections
+
+</div>
+
+<div>
+
 
 #### Why Go for HTTP APIs?
 - **Fast compilation**: Quick development cycle
@@ -593,16 +639,21 @@ POST   /api/createPost         # Redundant verb
 
 </div>
 
+</div>
+
+</div>
+
+
 ---
 
-# Basic HTTP Server Setup
+# Basic http server setup
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Minimal HTTP Server
+#### Minimal http server
 ```go
 package main
 
@@ -628,7 +679,7 @@ func main() {
 
 <div>
 
-#### With Custom Server Configuration
+#### With custom server configuration
 ```go
 func main() {
     mux := http.NewServeMux()
@@ -655,14 +706,14 @@ func main() {
 
 ---
 
-# HTTP Handlers Deep Dive
+# HTTP handlers deep dive
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Handler Function Signature
+#### Handler function signature
 ```go
 type HandlerFunc func(http.ResponseWriter, *http.Request)
 
@@ -682,7 +733,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 <div>
 
-#### Handler Interface
+#### Handler interface
 ```go
 type Handler interface {
     ServeHTTP(ResponseWriter, *Request)
@@ -719,7 +770,7 @@ func (uc *userController) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 <div class="code-columns">
 <div>
 
-#### Data Models with JSON Tags
+#### Data models with JSON tags
 ```go
 type User struct {
     ID       int       `json:"id"`
@@ -783,13 +834,14 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 ---
 
-# JSON Handling Continued
+# JSON handling (continued)
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
+#### JSON response
 ```go
     // Encode JSON response
     response := APIResponse{
@@ -811,7 +863,7 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 <div>
 
-#### JSON Helper Functions
+#### JSON helper functions
 ```go
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
     w.Header().Set("Content-Type", "application/json")
@@ -837,14 +889,14 @@ func readJSON(r *http.Request, dst interface{}) error {
 
 ---
 
-# URL Routing Patterns
+# URL routing patterns
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Manual Path Parsing
+#### Manual path parsing
 ```go
 func userHandler(w http.ResponseWriter, r *http.Request) {
     path := r.URL.Path
@@ -875,7 +927,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 <div>
 
-#### Using Gorilla Mux Router
+#### Using Gorilla Mux router
 ```go
 import "github.com/gorilla/mux"
 
@@ -908,14 +960,14 @@ func setupRoutes() *mux.Router {
 
 ---
 
-# Advanced Routing with Gorilla Mux
+# Advanced routing with Gorilla Mux
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Path Variables & Validation
+#### Path variables & validation
 ```go
 func getUserHandler(w http.ResponseWriter, r *http.Request) {
     vars := mux.Vars(r)
@@ -938,37 +990,31 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 <div>
 
-#### Query Parameters & Filtering
+#### Query parameters & filtering
 ```go
 func getUsersHandler(w http.ResponseWriter, r *http.Request) {
     query := r.URL.Query()
-    
-    // Parse query parameters
+    // Parse query parameters 
+    // like /users?page=1&limit=10&active=true&search=john
     page := getIntParam(query, "page", 1)
     limit := getIntParam(query, "limit", 10)
     active := getBoolParam(query, "active", true)
     search := query.Get("search")
-    
     filters := UserFilters{
         Page:   page,
         Limit:  limit,
         Active: &active,
         Search: search,
     }
-    
     users, total, err := getUsersWithFilters(filters)
     if err != nil {
         http.Error(w, "Error fetching users", http.StatusInternalServerError)
-        return
-    }
-    
+        return}
     response := PaginatedResponse{
         Data:  users,
         Total: total,
         Page:  page,
-        Limit: limit,
-    }
-    
+        Limit: limit,}
     writeJSON(w, http.StatusOK, response)
 }
 ```
@@ -981,7 +1027,7 @@ func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 
 ---
 
-# Middleware Patterns
+# Middleware patterns
 
 <div class="slide-content">
 
@@ -990,7 +1036,7 @@ func getUsersHandler(w http.ResponseWriter, r *http.Request) {
 <div class="code-columns">
 <div>
 
-#### Basic Middleware Structure
+#### Basic middleware structure
 ```go
 type Middleware func(http.Handler) http.Handler
 
@@ -1014,7 +1060,7 @@ http.Handle("/api/", loggingMiddleware(http.HandlerFunc(apiHandler)))
 
 <div>
 
-#### CORS Middleware
+#### CORS middleware
 ```go
 func corsMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1040,14 +1086,15 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 ---
 
-# Authentication Middleware
+# Authentication middleware
 
 <div class="slide-content">
+
+#### JWT authentication middleware
 
 <div class="code-columns">
 <div>
 
-#### JWT Authentication Middleware
 ```go
 func authMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1103,14 +1150,14 @@ func getCurrentUser(r *http.Request) (int, error) {
 
 ---
 
-# Middleware Chaining
+# Middleware chaining
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Manual Chaining
+#### Manual chaining
 ```go
 func setupServer() {
     mux := http.NewServeMux()
@@ -1136,35 +1183,26 @@ func setupServer() {
 
 <div>
 
-#### Middleware Chain Helper
+#### Middleware chain helper
 ```go
 func chain(middlewares ...Middleware) Middleware {
     return func(final http.Handler) http.Handler {
         for i := len(middlewares) - 1; i >= 0; i-- {
             final = middlewares[i](final)
-        }
-        return final
-    }
-}
-
-// Usage
-func setupServerWithChain() {
+        } return final
+}}
+func setupServerWithChain() { // Usage
     mux := http.NewServeMux()
     mux.HandleFunc("/api/users", usersHandler)
-    
-    // Clean chaining
-    handler := chain(
+    handler := chain(  // Clean chaining one-by-one
         loggingMiddleware,
         corsMiddleware,
         authMiddleware,
     )(mux)
-    
     server := &http.Server{
         Addr:    ":8080",
         Handler: handler,
-    }
-    
-    server.ListenAndServe()
+    } server.ListenAndServe()
 }
 ```
 
@@ -1176,14 +1214,14 @@ func setupServerWithChain() {
 
 ---
 
-# Error Handling Strategies
+# Error handling strategies
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Custom Error Types
+#### Custom error types
 ```go
 type APIError struct {
     Code    int    `json:"code"`
@@ -1210,11 +1248,6 @@ var (
         Code:    400,
         Message: "Invalid input data",
     }
-    
-    ErrUnauthorized = APIError{
-        Code:    401,
-        Message: "Unauthorized access",
-    }
 )
 ```
 
@@ -1222,7 +1255,7 @@ var (
 
 <div>
 
-#### Error Handling Middleware
+#### Error handling middleware
 ```go
 func errorHandlingMiddleware(next http.Handler) http.Handler {
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -1256,7 +1289,7 @@ func errorHandlingMiddleware(next http.Handler) http.Handler {
 
 ---
 
-# Error Response Helpers
+# Error response helpers
 
 <div class="slide-content">
 
@@ -1275,7 +1308,9 @@ func writeError(w http.ResponseWriter, apiErr APIError) {
     }
 }
 
-func writeErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
+func writeErrorf(w http.ResponseWriter, 
+                code int, format string, 
+                args ...interface{}) {
     apiErr := APIError{
         Code:    code,
         Message: fmt.Sprintf(format, args...),
@@ -1321,7 +1356,7 @@ func getUserHandler(w http.ResponseWriter, r *http.Request) {
 
 ---
 
-# Testing HTTP Endpoints
+# Testing HTTP endpoints
 
 <div class="slide-content">
 
@@ -1336,21 +1371,16 @@ func TestGetUserHandler(t *testing.T) {
     if err != nil {
         t.Fatal(err)
     }
-    
     // Create response recorder
     rr := httptest.NewRecorder()
-    
     // Create handler
     handler := http.HandlerFunc(getUserHandler)
-    
     // Execute request
     handler.ServeHTTP(rr, req)
-    
     // Check status code
     if status := rr.Code; status != http.StatusOK {
         t.Errorf("Expected status %v, got %v", http.StatusOK, status)
     }
-    
     // Check response body
     expected := `{"id":123,"name":"John Doe"}`
     if strings.TrimSpace(rr.Body.String()) != expected {
@@ -1367,7 +1397,6 @@ func TestGetUserHandler(t *testing.T) {
 ```go
 func TestUserRoutes(t *testing.T) {
     router := setupRoutes()
-    
     tests := []struct {
         name           string
         method         string
@@ -1379,19 +1408,16 @@ func TestUserRoutes(t *testing.T) {
         {"User not found", "GET", "/api/v1/users/999", 404},
         {"Invalid user ID", "GET", "/api/v1/users/abc", 400},
     }
-    
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             req, _ := http.NewRequest(tt.method, tt.url, nil)
             rr := httptest.NewRecorder()
-            
+       
             router.ServeHTTP(rr, req)
             
             if rr.Code != tt.expectedStatus {
                 t.Errorf("Expected %d, got %d", tt.expectedStatus, rr.Code)
-            }
-        })
-    }
+    }})}
 }
 ```
 
@@ -1403,14 +1429,14 @@ func TestUserRoutes(t *testing.T) {
 
 ---
 
-# Testing with JSON Payloads
+# Testing with JSON payloads
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### Testing POST Requests
+#### Testing POST requests
 ```go
 func TestCreateUserHandler(t *testing.T) {
     user := CreateUserRequest{
@@ -1418,30 +1444,22 @@ func TestCreateUserHandler(t *testing.T) {
         Email:    "jane@example.com",
         Password: "securepassword",
     }
-    
     jsonData, _ := json.Marshal(user)
-    
     req, err := http.NewRequest("POST", "/api/users", bytes.NewBuffer(jsonData))
     if err != nil {
         t.Fatal(err)
     }
     req.Header.Set("Content-Type", "application/json")
-    
     rr := httptest.NewRecorder()
     handler := http.HandlerFunc(createUserHandler)
-    
     handler.ServeHTTP(rr, req)
-    
     if status := rr.Code; status != http.StatusCreated {
         t.Errorf("Expected %v, got %v", http.StatusCreated, status)
     }
-    
-    // Parse response
-    var response APIResponse
+    var response APIResponse  // Parse response
     if err := json.NewDecoder(rr.Body).Decode(&response); err != nil {
         t.Fatal("Could not decode response")
     }
-    
     if !response.Success {
         t.Error("Expected success to be true")
     }
@@ -1473,14 +1491,7 @@ func TestCreateUserValidation(t *testing.T) {
             expectedStatus: 400,
             expectedError:  "Invalid email format",
         },
-        {
-            name:           "Weak password",
-            payload:        CreateUserRequest{Name: "Test", Email: "test@test.com", Password: "123"},
-            expectedStatus: 400,
-            expectedError:  "Password too weak",
-        },
     }
-    
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             jsonData, _ := json.Marshal(tt.payload)
@@ -1493,10 +1504,7 @@ func TestCreateUserValidation(t *testing.T) {
             
             if rr.Code != tt.expectedStatus {
                 t.Errorf("Expected %d, got %d", tt.expectedStatus, rr.Code)
-            }
-        })
-    }
-}
+}})}}
 ```
 
 </div>
@@ -1507,13 +1515,14 @@ func TestCreateUserValidation(t *testing.T) {
 
 ---
 
-# Part III: Flutter HTTP Client Development
+# Part III: Flutter HTTP client 
 
 <div class="slide-content">
 
-## Dart's HTTP Package
-
 > **`package:http`** is the standard HTTP client library for Dart and Flutter applications.
+
+<div class="code-columns">
+<div>
 
 #### Key Features
 - **Simple API**: Easy-to-use methods for common HTTP operations
@@ -1521,6 +1530,10 @@ func TestCreateUserValidation(t *testing.T) {
 - **Request customization**: Headers, timeouts, body content
 - **Response handling**: Status codes, headers, body parsing
 - **Error handling**: Network errors, timeouts, HTTP errors
+
+</div>
+
+<div>
 
 #### Installation
 ```yaml
@@ -1536,16 +1549,20 @@ import 'dart:convert';
 
 </div>
 
+</div>
+
+</div>
+
 ---
 
-# Basic HTTP Requests in Flutter
+# Basic HTTP requests in Flutter
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### GET Request
+#### GET request
 ```dart
 Future<User> fetchUser(int userId) async {
   final response = await http.get(
@@ -1571,7 +1588,7 @@ Future<User> fetchUser(int userId) async {
 
 <div>
 
-#### POST Request
+#### POST request
 ```dart
 Future<User> createUser(CreateUserRequest request) async {
   final response = await http.post(
@@ -1603,14 +1620,14 @@ Future<User> createUser(CreateUserRequest request) async {
 
 ---
 
-# HTTP Request Methods
+# HTTP request methods
 
 <div class="slide-content">
 
 <div class="code-columns">
 <div>
 
-#### PUT Request
+#### PUT request
 ```dart
 Future<User> updateUser(int userId, UpdateUserRequest request) async {
   final response = await http.put(
@@ -1634,7 +1651,7 @@ Future<User> updateUser(int userId, UpdateUserRequest request) async {
 
 <div>
 
-#### DELETE Request
+#### DELETE request
 ```dart
 Future<void> deleteUser(int userId) async {
   final response = await http.delete(
@@ -1675,14 +1692,12 @@ Future<void> deleteUser(int userId) async {
 class User {
   final int id;
   final String name;
-  final String email;
   final bool active;
   final DateTime createdAt;
   
   User({
     required this.id,
     required this.name,
-    required this.email,
     required this.active,
     required this.createdAt,
   });
@@ -1691,7 +1706,6 @@ class User {
     return User(
       id: json['id'] as int,
       name: json['name'] as String,
-      email: json['email'] as String,
       active: json['active'] as bool,
       createdAt: DateTime.parse(json['created_at'] as String),
     );
@@ -1701,7 +1715,6 @@ class User {
     return {
       'id': id,
       'name': name,
-      'email': email,
       'active': active,
       'created_at': createdAt.toIso8601String(),
     };
