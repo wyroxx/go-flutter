@@ -40,8 +40,7 @@ You can draw inspiration from previous successful projects in the [Fall 2024 Flu
 
 ### Backend Development (8 points)
 - Go-based microservices architecture (minimum 3 services) (3 points)
-- RESTful API with Swagger documentation (1 point)
-- gRPC implementation for communication between microservices (1 point)
+- RESTful API with Swagger documentation (2 points)
 - PostgreSQL database with proper schema design (1 point)
 - JWT-based authentication and authorization (1 point)
 - Comprehensive unit and integration tests (1 point)
