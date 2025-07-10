@@ -181,7 +181,6 @@ Lecture 05: **Advanced Patterns**
 - **JWT implementation with proper security measures**
 - **Common security vulnerabilities and prevention**
 - **Production-ready security practices**
-- **Performance and monitoring considerations**
 
 </div>
 
